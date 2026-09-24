@@ -47,7 +47,18 @@ def get_member(member_id):
 
 @app.route('/members', methods=['POST'])
 def add_member():
-    member = request.json
+    member = request.get_json(silent=True)
+
+    if (
+        not isinstance(member, dict)
+        or not isinstance(member.get("first_name"), str)
+        or not isinstance(member.get("age"), int)
+        or member.get("age") <= 0
+        or not isinstance(member.get("lucky_numbers"), list)
+        or not all(isinstance(number, int) for number in member.get("lucky_numbers"))
+    ):
+        return jsonify({"error": "Invalid request"}), 400
+
     new_member = jackson_family.add_member(member)
     return jsonify(new_member), 200
 
